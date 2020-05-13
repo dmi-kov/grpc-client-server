@@ -1,0 +1,17 @@
+syntax = "proto3";
+
+package api;
+
+service API {
+    rpc CallURL (URLMessage) returns (stream ResponseMessage);
+}
+
+message URLMessage {
+    string url = 1;
+}
+
+message ResponseMessage {
+    bytes headers = 1;
+    bytes body = 2;
+}
+
