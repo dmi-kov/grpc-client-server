@@ -1,11 +1,8 @@
 package api
 
 import (
-	"bytes"
-	"encoding/json"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"log"
 	"net/http"
 	"net/url"
@@ -30,28 +27,13 @@ func (s *Handler) CallURL(req *URLMessage, stream API_CallURLServer) error {
 	}
 	defer resp.Body.Close()
 
-	bytesHeaders, err := json.Marshal(resp.Header)
-	if err != nil {
-		return fmt.Errorf("fail marshal headers: %v", err)
-	}
-
-	bytesBody, err := ioutil.ReadAll(resp.Body)
-	if err != nil {
-		return fmt.Errorf("fail read body: %v", err)
-	}
-
 	var (
 		chunkSize = 1024
 		buffer    = make([]byte, chunkSize)
 	)
 
-	reader := io.MultiReader(
-		bytes.NewReader(bytesHeaders),
-		bytes.NewReader(bytesBody),
-	)
-
 	for {
-		n, err := reader.Read(buffer)
+		n, err := resp.Body.Read(buffer)
 		if err != nil {
 			if err == io.EOF {
 				err = nil
