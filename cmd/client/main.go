@@ -2,11 +2,13 @@ package main
 
 import (
 	"context"
+	"encoding/json"
 	"flag"
 	"github.com/grpc-client-server/api"
 	"go.uber.org/zap"
 	"google.golang.org/grpc"
 	"io"
+	"net/http"
 	"net/url"
 )
 
@@ -38,7 +40,8 @@ func main() {
 		logger.Fatalf("Error when calling server: %s", err)
 	}
 
-	acc := make([]byte, 0)
+	bodyAcc := make([]byte, 0)
+	headers := make([]byte, 0)
 
 	for {
 		resp, err := stream.Recv()
@@ -49,8 +52,15 @@ func main() {
 			logger.Fatalf("Fail reading stream: %s", err)
 			break
 		}
-		acc = append(acc, resp.Response...)
+		bodyAcc = append(bodyAcc, resp.Response...)
+		headers = append(headers, resp.Headers...)
 	}
 
-	logger.Infof("Response from server: \n %v", string(acc))
+	var headersMap http.Header
+	err = json.Unmarshal(headers, &headersMap)
+	if err != nil {
+		logger.Fatalf("Fail Unmarshal headers: %s", err)
+	}
+
+	logger.Infof("Response from server: headers %v \n body \n %v", headersMap, string(bodyAcc))
 }

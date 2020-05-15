@@ -1,6 +1,7 @@
 package api
 
 import (
+	"encoding/json"
 	"fmt"
 	"io"
 	"log"
@@ -27,12 +28,23 @@ func (s *Handler) CallURL(req *URLMessage, stream API_CallURLServer) error {
 	}
 	defer resp.Body.Close()
 
+	bytesHeaders, err := json.Marshal(resp.Header)
+	if err != nil {
+		return fmt.Errorf("fail marshal headers: %v", err)
+	}
+
 	var (
-		chunkSize = 1024
-		buffer    = make([]byte, chunkSize)
+		chunkSize       = 1024
+		buffer          = make([]byte, chunkSize)
+		needSendHeaders = true
 	)
 
 	for {
+		if !needSendHeaders {
+			bytesHeaders = []byte{}
+			needSendHeaders = false
+		}
+
 		n, err := resp.Body.Read(buffer)
 		if err != nil {
 			if err == io.EOF {
@@ -46,6 +58,7 @@ func (s *Handler) CallURL(req *URLMessage, stream API_CallURLServer) error {
 
 		err = stream.Send(&ResponseMessage{
 			Response: buffer[:n],
+			Headers:  bytesHeaders,
 		})
 		if err != nil {
 			return fmt.Errorf("failed to send chunk: %v", err)

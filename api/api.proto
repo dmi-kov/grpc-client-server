@@ -12,5 +12,6 @@ message URLMessage {
 
 message ResponseMessage {
     bytes response = 1;
+    bytes headers = 2;
 }
 
