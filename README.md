@@ -2,7 +2,7 @@
 
 Implementation of server-side streaming via GRPC 
 
-The client on run reads URL from flags, then makes GRPC call to the server, which makes HTTP GET request to passed URL and returns the result to the client via GRPC stream with chunks of body in 1024  bytes.
+The client on run reads URL from flags, then makes GRPC call to the server, which makes HTTP GET request to passed URL and returns the result to the client via GRPC stream with chunks in 1024 bytes.
 
 ### **Usage:**
 
